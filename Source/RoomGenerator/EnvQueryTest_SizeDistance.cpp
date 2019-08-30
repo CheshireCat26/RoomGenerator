@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SizeDistanceEnvQueryTest.h"
+#include "EnvQueryTest_SizeDistance.h"
 #include "EnvironmentQuery/Items/EnvQueryItemType_VectorBase.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "EnvironmentQuery/Contexts/EnvQueryContext_Querier.h"
 
-namespace 
+namespace
 {
 	FORCEINLINE float CalcDistance2D(const FVector& PosA, const FVector& PosB)
 	{
@@ -22,14 +22,14 @@ namespace
 	}
 }
 
-USizeDistanceEnvQueryTest::USizeDistanceEnvQueryTest(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+UEnvQueryTest_SizeDistance::UEnvQueryTest_SizeDistance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	DistanceTo = UEnvQueryContext_Querier::StaticClass();
 	Cost = EEnvTestCost::Low;
 	ValidItemType = UEnvQueryItemType_VectorBase::StaticClass();
 }
 
-void USizeDistanceEnvQueryTest::RunTest(FEnvQueryInstance& QueryInstance) const
+void UEnvQueryTest_SizeDistance::RunTest(FEnvQueryInstance& QueryInstance) const
 {
 	UObject* QueryOwner = QueryInstance.Owner.Get();
 	if (QueryOwner == nullptr)
@@ -40,7 +40,7 @@ void USizeDistanceEnvQueryTest::RunTest(FEnvQueryInstance& QueryInstance) const
 	// don't support context Item here, it doesn't make any sense
 	TArray<AActor*> ActorContexts = {};
 	TArray<FVector> LocationContexts;
-	if (!(QueryInstance.PrepareContext(DistanceTo, ActorContexts) 
+	if (!(QueryInstance.PrepareContext(DistanceTo, ActorContexts)
 		|| QueryInstance.PrepareContext(DistanceTo, LocationContexts)))
 	{
 		return;
@@ -57,7 +57,7 @@ void USizeDistanceEnvQueryTest::RunTest(FEnvQueryInstance& QueryInstance) const
 		const FVector ItemLocation = GetItemLocation(QueryInstance, It.GetIndex());
 		AActor* ItemActor = GetItemActor(QueryInstance, It.GetIndex());
 		float ItemActorR;
-		if (ItemActor) 
+		if (ItemActor)
 		{
 			ItemActorR = GetActorRadius(*ItemActor);
 		}
@@ -96,14 +96,14 @@ void USizeDistanceEnvQueryTest::RunTest(FEnvQueryInstance& QueryInstance) const
 	}
 }
 
-FText USizeDistanceEnvQueryTest::GetDescriptionTitle() const
+FText UEnvQueryTest_SizeDistance::GetDescriptionTitle() const
 {
 	return FText::FromString(FString::Printf(TEXT("%s: to %s"),
 		*Super::GetDescriptionTitle().ToString(),
 		*UEnvQueryTypes::DescribeContext(DistanceTo).ToString()));
 }
 
-FText USizeDistanceEnvQueryTest::GetDescriptionDetails() const
+FText UEnvQueryTest_SizeDistance::GetDescriptionDetails() const
 {
 	return DescribeFloatTestParams();
 }
