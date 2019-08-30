@@ -18,7 +18,7 @@ namespace
 		FVector Origin;
 		FVector Extent;
 		Actor.GetActorBounds(true, Origin, Extent);
-		return (Extent - Origin).Size2D();
+		return Extent.Size2D();
 	}
 }
 
@@ -27,8 +27,6 @@ USizeDistanceEnvQueryTest::USizeDistanceEnvQueryTest(const FObjectInitializer& O
 	DistanceTo = UEnvQueryContext_Querier::StaticClass();
 	Cost = EEnvTestCost::Low;
 	ValidItemType = UEnvQueryItemType_VectorBase::StaticClass();
-	FilterType = EEnvTestFilterType::Minimum;
-	ScoringEquation = EEnvTestScoreEquation::Linear;
 }
 
 void USizeDistanceEnvQueryTest::RunTest(FEnvQueryInstance& QueryInstance) const
@@ -48,28 +46,52 @@ void USizeDistanceEnvQueryTest::RunTest(FEnvQueryInstance& QueryInstance) const
 		return;
 	}
 
+	FloatValueMin.BindData(QueryOwner, QueryInstance.QueryID);
+	float MinThresholdValue = FloatValueMin.GetValue();
+
+	FloatValueMax.BindData(QueryOwner, QueryInstance.QueryID);
+	float MaxThresholdValue = FloatValueMax.GetValue();
+
 	for (FEnvQueryInstance::ItemIterator It(this, QueryInstance); It; ++It)
 	{
 		const FVector ItemLocation = GetItemLocation(QueryInstance, It.GetIndex());
 		AActor* ItemActor = GetItemActor(QueryInstance, It.GetIndex());
 		float ItemActorR;
-		if (ItemActor) {
+		if (ItemActor) 
+		{
 			ItemActorR = GetActorRadius(*ItemActor);
 		}
 
-		float MinThresholdValue = 0;
-		float MaxThresholdValue = 0;
-
-		if (ActorContexts.Num()) { 
-			for (int32 ContextIndex = 0; ContextIndex < ActorContexts.Num(); ContextIndex++)
-			{
+		for (int32 ContextIndex = 0;
+			ContextIndex < (ActorContexts.Num() ? ActorContexts.Num() : LocationContexts.Num()); ContextIndex++)
+		{
+			FVector ContextLocation;
+			if (ActorContexts.Num()) {
 				AActor* ActorContext = ActorContexts[ContextIndex];
 				float ActorContextR = GetActorRadius(*ActorContext);
-				MinThresholdValue = MinThresholdValue < ActorContextR ? ActorContextR : MinThresholdValue;
-				MinThresholdValue = MinThresholdValue < ItemActorR ? ItemActorR : MinThresholdValue;
-				const float Distance = CalcDistance2D(ItemLocation, ActorContext->GetActorLocation());
-				It.SetScore(TestPurpose, FilterType, Distance, MinThresholdValue, MaxThresholdValue);
+				ContextLocation = ActorContext->GetActorLocation();
+				if (ItemActor)
+				{
+					MinThresholdValue = fmaxf(MinThresholdValue, ActorContextR + ItemActorR);
+					MaxThresholdValue = fmaxf(MaxThresholdValue, ActorContextR + ItemActorR);
+				}
+				else
+				{
+					MinThresholdValue = fmaxf(MinThresholdValue, ActorContextR);
+					MaxThresholdValue = fmaxf(MaxThresholdValue, ActorContextR);
+				}
 			}
+			else
+			{
+				ContextLocation = LocationContexts[ContextIndex];
+				if (ItemActor)
+				{
+					MinThresholdValue = fmaxf(MinThresholdValue, ItemActorR);
+					MaxThresholdValue = fmaxf(MaxThresholdValue, ItemActorR);
+				}
+			}
+			const float Distance = CalcDistance2D(ItemLocation, ContextLocation);
+			It.SetScore(TestPurpose, FilterType, Distance, MinThresholdValue, MaxThresholdValue);
 		}
 	}
 }
