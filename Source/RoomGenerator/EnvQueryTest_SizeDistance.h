@@ -18,8 +18,6 @@ class ROOMGENERATOR_API UEnvQueryTest_SizeDistance : public UEnvQueryTest
 	UPROPERTY(EditDefaultsOnly, Category = Distance)
 	TSubclassOf<UEnvQueryContext> DistanceTo;
 
-	UEnvQueryTest_SizeDistance(const FObjectInitializer& ObjectInitializer);
-
 	virtual void RunTest(FEnvQueryInstance& QueryInstance) const override;
 	virtual FText GetDescriptionTitle() const override;
 	virtual FText GetDescriptionDetails() const override;
