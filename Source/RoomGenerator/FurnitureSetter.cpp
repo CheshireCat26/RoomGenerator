@@ -28,6 +28,9 @@ void AFurnitureSetter::GetFurniture()
 {
 	UGameplayStatics::GetAllActorsWithTag(this, TEXT("Bed"), Beds);
 	UGameplayStatics::GetAllActorsWithTag(this, TEXT("WallSide"), WallSided); // TODO: remove beds from wallside
+	WallSided = WallSided.FilterByPredicate([](AActor* const Actor) {
+		return !Actor->ActorHasTag("Bed");
+	});
 	UGameplayStatics::GetAllActorsWithTag(this, TEXT("Table"), Tables);
 	UGameplayStatics::GetAllActorsWithTag(this, TEXT("Chair"), Chairs);
 }
@@ -46,28 +49,35 @@ void AFurnitureSetter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
+// TODO: add furniture coping instead of removing
 AActor* AFurnitureSetter::TakeFurniture()
 {
 	AActor* Furniture = nullptr;
+	TArray<AActor*>* FurnitureList = nullptr;
 	if (Beds.Num() && BedsCounter)
 	{
-		Furniture = Beds[FMath::RandRange(0, Beds.Num()-1)];
+		FurnitureList = &Beds;
 		--BedsCounter;
 	}
 	else if (WallSided.Num() && WallSidedCounter)
 	{
-		Furniture = WallSided[FMath::RandRange(0, WallSided.Num()-1)];
+		FurnitureList = &WallSided;
 		--WallSidedCounter;
 	}
 	else if (Tables.Num() && TablesCounter)
 	{
-		Furniture = Tables[FMath::RandRange(0, Tables.Num()-1)];
+		FurnitureList = &Tables;
 		--TablesCounter;
 	}
 	else if (Chairs.Num() && ChairsCounter)
 	{
-		Furniture = Chairs[FMath::RandRange(0, Chairs.Num()-1)];
+		FurnitureList = &Chairs;
 		--ChairsCounter;
+	}
+	if (FurnitureList && FurnitureList->Num())
+	{
+		Furniture = (*FurnitureList)[FMath::RandRange(0, FurnitureList->Num() - 1)];
+		FurnitureList->Remove(Furniture);
 	}
 	return Furniture;
 }

@@ -10,5 +10,5 @@ public class RoomGeneratorTarget : TargetRules
 		Type = TargetType.Game;
 
 		ExtraModuleNames.AddRange( new string[] { "RoomGenerator" } );
-	}
+    }
 }
