@@ -18,9 +18,4 @@ class ROOMGENERATOR_API UBTTask_AlignFurniture : public UBTTask_BlackboardBase
 	virtual void InitializeFromAsset(UBehaviorTree& Asset) override;
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-protected:
-	AActor* GetNearestActorWithTag(const UObject* WorldContextObject, FName Tag, AActor& NearTo);
-	void RotateAwayFrom(AActor& RotateFrom, AActor& RotateObj);
-	FHitResult MoveTo(AActor& MoveTo, AActor& MoveObj);
 };
