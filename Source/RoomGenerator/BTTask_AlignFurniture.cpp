@@ -103,6 +103,13 @@ EBTNodeResult::Type UBTTask_AlignFurniture::ExecuteTask(UBehaviorTreeComponent& 
 				}
 			}
 		}
+		AActor* Floor = GetNearestActorWithTag(Furniture, TEXT("Floor"), *Furniture);
+		if (IsValid(Floor))
+		{
+			FVector FurnitureLocation = Furniture->GetActorLocation();
+			Furniture->SetActorLocation(FVector(FurnitureLocation.X, FurnitureLocation.Y, FurnitureLocation.Z -
+				Floor->GetHorizontalDistanceTo(Furniture)), true);
+		}
 		return EBTNodeResult::Succeeded;
 	}
 
